@@ -7,8 +7,7 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Додаємо базовий маршрут, щоб Render бачив, що сервер живий
-app.get('/', (req, res) => { res.send('TikTok Server is running!'); });
+app.get('/', (req, res) => { res.send('TikTok Server is alive!'); });
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -27,8 +26,13 @@ io.on('connection', (socket) => {
             .then(state => socket.emit('connected', state))
             .catch(err => socket.emit('error', err.toString()));
 
+        // Отримуємо чат та передаємо потрібні дані
         tiktokConn.on('chat', data => {
-            socket.emit('chat', { user: data.uniqueId, comment: data.comment });
+            socket.emit('chat', { 
+                nickname: data.uniqueId, 
+                comment: data.comment,
+                profilePicture: data.profilePictureUrl 
+            });
         });
     });
 
@@ -39,5 +43,5 @@ io.on('connection', (socket) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server started on port ${PORT}`);
 });
